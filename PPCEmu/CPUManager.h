@@ -1,3 +1,7 @@
+/* Made by Slam */
+/*
+CPU handling (threads){soon}
+*/
 #include "MMU.h"
 #include "CPU.h"
 
