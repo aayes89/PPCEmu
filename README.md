@@ -3,6 +3,7 @@ Emulador para PowerPC escrito en C++ con Visual Studio 2022.
 
 # ¿Porqué?
 <p>
+Este proyecto empezó como inspiración de otro que se encuentra en mi repositorio <a href="https://github.com/aayes89/CHIP8Emu">CHIP8Emu</a>, el cual, por su simplicidad, me hizo pensar si sería posible hacer algo más desafiante: un emulador para la arquitectura PowerPC basado en Xenon.<br>
  Actualmente existen programas cuyo objetivo es actuar como máquinas virtuales para diversas arquitecturas y hardware:<br>
  <b>Pearpc, Qemu, VirtualBox, VMWare</b><br><br>
  Ninguno de ellos es capaz de emular el comportamiento de la consola Xbox 360 como máquina virtual.<br>
