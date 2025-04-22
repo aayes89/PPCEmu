@@ -14,4 +14,5 @@ Emulador para PowerPC escrito en C++ con Visual Studio 2022.
 * Manejo de Logs.
 
 # Capturas
- <img src=""/>
+ ![imagen](https://github.com/user-attachments/assets/17b4352c-9b19-4979-a74d-8cf9c637c068)
+"/>
