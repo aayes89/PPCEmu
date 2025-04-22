@@ -1,4 +1,8 @@
-﻿#include "Display.h"
+/* Made by Slam */
+/*
+GDI - WinAPI and toolkit for primitives
+*/
+#include "Display.h"
 #include "MMU.h"
 #include "Log.h"
 #include <cstring>
