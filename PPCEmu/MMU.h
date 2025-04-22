@@ -1,3 +1,4 @@
+/* Made by Slam */
 #pragma once
 #include "MemoryDevice.h"
 #include <vector>
@@ -50,7 +51,7 @@ public:
     void Write64(uint64_t address, uint64_t value);
 
     size_t GetRegionCount() const { return regions.size(); }    
-    void SetVerboseLogging(bool verbose) { verbose_logging_ = verbose; } // Nuevo método
+    void SetVerboseLogging(bool verbose) { verbose_logging_ = verbose; } // Nuevo mÃ©todo
 
 private:
     MemoryRegion* FindRegion(uint64_t address, bool read, bool write, bool execute);
