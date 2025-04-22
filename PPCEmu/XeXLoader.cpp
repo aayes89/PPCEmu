@@ -1,3 +1,7 @@
+/* Made by Slam */
+/*
+XeX loader {soon}
+*/
 #include <cstdint>
 #include <array>
 #include <memory>
@@ -21,7 +25,7 @@ struct XEXHeader {
 	uint32_t reserved;
 	uint32_t cert_offset;
 	uint32_t section_count;
-	// Seguido por section_count entradas de secci髇
+	// Seguido por section_count entradas de secci贸n
 };
 
 struct XEXSection {
@@ -42,8 +46,8 @@ void LoadXEX(const std::string& filename, MMU& mmu) {
 	XEXHeader header;
 	file.read(reinterpret_cast<char*>(&header), sizeof(XEXHeader));
 	if (std::string(header.magic, 4) != "XEX2") {
-		std::cerr << "Error: No es un archivo XEX v醠ido" << std::endl;
-		throw std::runtime_error("Formato XEX inv醠ido");
+		std::cerr << "Error: No es un archivo XEX v谩lido" << std::endl;
+		throw std::runtime_error("Formato XEX inv谩lido");
 	}
 
 	// Leer secciones
@@ -57,19 +61,19 @@ void LoadXEX(const std::string& filename, MMU& mmu) {
 		file.seekg(section.file_offset);
 		file.read(reinterpret_cast<char*>(buffer.data()), section.file_size);
 		mmu.Write(section.virtual_address, buffer.data(), buffer.size());
-		std::cout << "Cargada secci髇 en 0x" << std::hex << section.virtual_address
-			<< ", tama駉: 0x" << section.virtual_size << std::endl;
+		std::cout << "Cargada secci贸n en 0x" << std::hex << section.virtual_address
+			<< ", tama帽o: 0x" << section.virtual_size << std::endl;
 	}
 
 	file.close();
 
-	// Log de la primera instrucci髇 en el punto de entrada
+	// Log de la primera instrucci贸n en el punto de entrada
 	try {
 		u32 first_instr = mmu.Read32(sections[0].virtual_address);
-		std::cout << "Primera instrucci髇 en 0x" << std::hex << sections[0].virtual_address
+		std::cout << "Primera instrucci贸n en 0x" << std::hex << sections[0].virtual_address
 			<< ": 0x" << first_instr << std::endl;
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Error al leer la primera instrucci髇: " << e.what() << std::endl;
+		std::cerr << "Error al leer la primera instrucci贸n: " << e.what() << std::endl;
 	}
 }
