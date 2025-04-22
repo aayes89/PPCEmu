@@ -1,3 +1,7 @@
+/* Made by Slam */
+/*
+Virtual Memory Handler
+*/
 #pragma once
 #include "Tipos.h"
 
