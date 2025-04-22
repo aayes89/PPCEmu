@@ -1,4 +1,8 @@
-﻿#include "MMU.h"
+/* Made by Slam */
+/*
+Memory Management Unit
+*/
+#include "MMU.h"
 #include "Log.h"
 #include <stdexcept>
 
