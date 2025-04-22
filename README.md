@@ -1,18 +1,35 @@
 # PPCEmu
 Emulador para PowerPC escrito en C++ con Visual Studio 2022.
 
+# ¿Porqué?
+<p>
+ Actualmente existen programas cuyo objetivo es actuar como máquinas virtuales para diversas arquitecturas y hardware:<br>
+ <b>Pearpc, Qemu, VirtualBox, VMWare</b><br>
+ Ninguno de ellos es capaz de emular el comportamiento de la consola Xbox 360 como máquina virtual.<br>
+ Emuladores como Xenia, están destinados sólo a procesar los juegos directamente y el proyecto XenonRecomp a convertirlos en ejecutables para x86.<br>
+ Razones suficientes para darle una oportunidad a esta magnífica creación que tantos dolores de cabeza han traído a muchos y que ahora regresa debido al afán de no pocos.
+</p>
+
 # Objetivos
 * Emular el comportamiento de un hardware basado en PPC.
 * Emular el comportamiento de la consola Xbox 360.
-* Migrar a otras plataformas (Android e iOS)
+* Reducir el tamaño lo máximo posible.
+* Migrar a otras plataformas: <b>Android</b> {seguro} e <b>iOS</b> {improbable?} 
 
 # Implementado
-* Manejo de memoria virtual.
-* Manejo de instrucciones para PPC.
-* Manejo de pantalla Framebuffer con WinAPI.
+* Memoria virtual.
+* Conjunto de Instrucciones para PPC.
+* <b>Framebuffer</b> con WinAPI.
 * Kit de herramientas para textos y primitivas.
-* Manejo de Logs.
+* Logs.
+
+# Pendientes y Mejoras
+* Cargar binarios: <b>XEX, ELF, BIN</b>
+* Emular el comportamiento de la Xbox 360 desde el arranque.
+* Implementar manejo de SoC (más robusto)
+* Emular estructuras críticas de la consola. (<b>1BL, NAND, Dashboard, CD/DVD, HDD, ...</b>)
+* Optimizar código para reducir a lo indispensable (sanitizar)
 
 # Capturas
- ![imagen](https://github.com/user-attachments/assets/17b4352c-9b19-4979-a74d-8cf9c637c068)
-"/>
+![imagen](https://github.com/user-attachments/assets/17b4352c-9b19-4979-a74d-8cf9c637c068)
+
