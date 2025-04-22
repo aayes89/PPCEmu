@@ -1,9 +1,13 @@
+/* Made by Slam */
+/*
+Virtual RAM
+*/
 #include "Memory.h"
 #include "Log.h"
 #include <cstring>
 
 Memory::Memory(const std::string& name) : MemoryDevice(name) {
-    data_.resize(512 * 1024 * 1024, 0); // 512 MB
+    data_.resize(512 * 1024 * 1024, 0); // 512 MB RAM
     LOG_INFO("Memory", "[%s] initialized: %zu bytes.", name.c_str(), data_.size());
 }
 
