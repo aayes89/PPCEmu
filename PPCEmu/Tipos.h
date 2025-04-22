@@ -1,3 +1,7 @@
+/* Made by Slam */
+/*
+Hardcode characters and other things
+*/
 #pragma once
 #ifndef Tipos_H
 #define Tipos_H
