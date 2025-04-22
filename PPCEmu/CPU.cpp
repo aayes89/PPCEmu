@@ -1,4 +1,5 @@
-﻿#include "CPU.h"
+/* Made by Slam */
+#include "CPU.h"
 #include "Log.h"
 #include <iostream>
 #include <atomic>
