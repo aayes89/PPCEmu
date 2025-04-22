@@ -1,3 +1,7 @@
+/* Made by Slam */
+/*
+Main class
+*/
 #include <iostream>
 #include <fstream>
 #include <thread>
@@ -48,7 +52,7 @@ int main() {
     framebuffer->Clear();
     framebuffer->BlitText(50, 10, "Prueba de Primitivas en FB con GDI", 0xFFFFFF);
     framebuffer->BlitText(50, 40, "--------------------------------------", 0x00FF00);
-    framebuffer->BlitText(50, 50, "| XeLL RELOADED - Xenon Linux Loader |", 0x00FF00);
+    framebuffer->BlitText(50, 50, "| Testing primitives with own toolkit |", 0x00FF00);
     framebuffer->BlitText(50, 60, "--------------------------------------", 0x00FF00);
     framebuffer->BlitText(50, 100, "* Looking for bootloader file ...", 0xFFFF00);
     framebuffer->DrawRect(40, 30, 320, 50, 0xFF0000);
