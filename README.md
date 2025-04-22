@@ -33,3 +33,15 @@ Emulador para PowerPC escrito en C++ con Visual Studio 2022.
 # Capturas
 ![imagen](https://github.com/user-attachments/assets/17b4352c-9b19-4979-a74d-8cf9c637c068)
 
+# Agradecimientos
+* Comunidad del proyecto <a href="https://github.com/xenon-emu/xenon/tree/main">Xenon (2025)</a> y en particular <a href="https://github.com/bitsh1ft3r">bitsh1ft3r</a>
+* A mi esposa (por su enorme paciencia)
+* A mi gato (siempre presente, incluso cuando no lo llamaban)
+
+# Descargo de responsabilida
+
+<b>Este programa no tiene carácter comercial.<br>
+ Su uso queda reservado exclusivamente para estudio personal.<br></b>
+ <h3>NO soy responsable del mal empleo que pueda darle, por acción directa o indirecta.</h3>
+
+
