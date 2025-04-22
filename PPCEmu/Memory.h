@@ -13,7 +13,7 @@ using u32 = uint32_t;
 using u64 = uint64_t;
 using s32 = int32_t;
 
-constexpr u64 XBOX360_RAM_SIZE = 512 * 1024 * 1024;
+constexpr u64 XBOX360_RAM_SIZE = 512 * 1024 * 1024; // not used
 
 class Memory : public MemoryDevice {
 public:
