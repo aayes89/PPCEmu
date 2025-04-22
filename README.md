@@ -8,7 +8,7 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
  <b>Pearpc, Qemu, VirtualBox, VMWare</b><br><br>
  Ninguno de ellos es capaz de emular el comportamiento de la consola Xbox 360 como máquina virtual.<br>
  Emuladores como <a href="#">Cxbox</a> y <a href="https://github.com/xenia-project/xenia">Xenia</a>, están destinados sólo a procesar los juegos directamente y el proyecto <a href="https://github.com/hedge-dev/XenonRecomp">XenonRecomp</a> a convertirlos en ejecutables para x86.<br>
- Razones suficientes para darle una oportunidad a esta magnífica creación que tantos dolores de cabeza han traído a muchos y que ahora regresa debido al afán de no pocos con el surgimiento de <a href="https://github.com/grimdoomer/Xbox360BadUpdate">BadUpdate de Grimdoomer</a>.
+ Razones suficientes para darle una oportunidad a esta magnífica creación que tantos dolores de cabeza ha traído a muchos y que ahora regresa debido al afán de no pocos, con el surgimiento de <a href="https://github.com/grimdoomer/Xbox360BadUpdate">BadUpdate de Grimdoomer</a>.
 </p>
 
 # Objetivos
