@@ -1,3 +1,4 @@
+/* Made by Slam */
 #include <iostream>
 
 #define LOG_INFO(system, msg, ...)    printf("[INFO]    " msg "\n", ##__VA_ARGS__)
