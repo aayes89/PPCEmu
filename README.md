@@ -12,12 +12,14 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
 </p>
 
 # Objetivos
+
 * Emular el comportamiento de un hardware basado en PPC.
 * Emular el comportamiento de la consola Xbox 360.
-* Reducir el tamaño lo máximo posible.
+* Minimalista.
 * Migrar a otras plataformas: <b>Android</b> {seguro} e <b>iOS</b> {improbable?} 
 
 # Implementado
+
 * Memoria virtual.
 * Conjunto de Instrucciones para PPC.
 * <b>Framebuffer</b> con WinAPI.
@@ -25,6 +27,7 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
 * Logs.
 
 # Pendientes y Mejoras
+
 * Cargar binarios: <b>XEX, ELF, BIN</b>
 * Emular el comportamiento de la Xbox 360 desde el arranque.
 * Implementar manejo de SoC (más robusto)
@@ -32,9 +35,11 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
 * Optimizar código para reducir a lo indispensable (sanitizar)
 
 # Capturas
+
 ![imagen](https://github.com/user-attachments/assets/17b4352c-9b19-4979-a74d-8cf9c637c068)
 
 # Agradecimientos
+
 * Comunidad del proyecto <a href="https://github.com/xenon-emu/xenon/tree/main">Xenon (2025)</a> y en particular <a href="https://github.com/bitsh1ft3r">bitsh1ft3r</a>
 * A mi esposa (por su enorme paciencia)
 * A mi gato (siempre presente, incluso cuando no lo llamaban)
