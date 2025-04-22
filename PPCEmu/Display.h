@@ -1,4 +1,5 @@
-// Display.h
+/* Made by Slam */
+
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
@@ -10,11 +11,11 @@
 
 class Display : public MemoryDevice {
 public:
-    // name: identificador del dispositivo, base: dirección base del framebuffer
+    // name: identificador del dispositivo, base: direcciÃ³n base del framebuffer
     Display(const std::string& name, uint64_t baseAddress, int width, int height);
     ~Display();
 
-    // Implementación de MemoryDevice:
+    // ImplementaciÃ³n de MemoryDevice:
 
     uint8_t Read8(uint64_t a);
     uint16_t Read16(uint64_t a);
