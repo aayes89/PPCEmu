@@ -1,5 +1,5 @@
 # PPCEmu
-Emulador para PowerPC escrito en C++ con Visual Studio 2022.
+Emulador de PowerPC escrito en C++ con Visual Studio 2022 para Windows.
 
 # ¿Porqué?
 <p>
