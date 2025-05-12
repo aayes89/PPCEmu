@@ -24,8 +24,26 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
 * Conjunto de Instrucciones para PPC.
 * Cargar: <b>elf32, elf64</b> y <b>bin (RAW)</b>
 * <b>Framebuffer</b> con WinAPI.
-* Kit de herramientas para textos y primitivas.
 * Logs.
+* Kit de herramientas para textos y primitivas:
+```
+ void PutChar(char c);
+ void BlitChar(int x, int y, char c, uint32_t color);
+ void BlitText(int x, int y, const std::string& text, uint32_t color);
+ void BlitTextFromMemory(uint32_t addr, size_t max_len, int x, int y, uint32_t color);
+ void Clear(uint32_t color = 0);
+ void Draw1bppBitmap(uint8_t* src, uint32_t width, uint32_t height, uint32_t fb_base, uint32_t pitch, uint32_t fg_color, uint32_t bg_color);
+ void ScrollUp(int lines);
+ void ScrollDown(int lines);
+ void DrawRect(int x, int y, int w, int h, uint32_t color);
+ void FillRect(int x, int y, int w, int h, uint32_t color);
+ void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
+ void DrawCircle(int cx, int cy, int r, uint32_t color);
+ void FillCircle(int cx, int cy, int r, uint32_t color);
+ void DrawSquare(int x, int y, int size, uint32_t color);
+ void FillSquare(int x, int y, int size, uint32_t color);
+ void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+```
 
 # Pendientes y Mejoras
 
