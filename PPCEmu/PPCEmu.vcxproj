@@ -133,13 +133,15 @@
   <ItemGroup>
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="Display.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MMU.cpp" />
+    <ClCompile Include="MockMemoryDevice.h" />
     <ClCompile Include="PPCEmu.cpp" />
-    <ClCompile Include="Tipos.h" />
     <ClCompile Include="XeXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PPCEmuConfig.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CPUManager.h" />
     <ClInclude Include="Display.h" />
@@ -147,6 +149,7 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryDevice.h" />
     <ClInclude Include="MMU.h" />
+    <ClInclude Include="PPCEmu.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="..\..\..\..\..\..\Windows\Fonts\arial.ttf" />

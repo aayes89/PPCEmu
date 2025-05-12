@@ -1,22 +1,13 @@
-/* Made by Slam - some extracts (no used) from Xenon project */
+// CPU.h
 #ifndef CPU_H
 #define CPU_H
 
 #include "MMU.h"
 #include <array>
 #include <cstdint>
-#include "Tipos.h"
-
-/*#define FPSCR_FI (1 << 20)  // Inexact
-#define FPSCR_FN (1 << 16)
-#define FPSCR_FP (1 << 17)
-#define FPSCR_FZ (1 << 18)
-#define FPSCR_FU (1 << 19)
-#define FPSCR_UX (1 << 5)   // Underflow
-#define FPSCR_OX (1 << 3)
-#define FPSCR_VX (1 << 2)
-#define FPSCR_FX (1 << 0)
-*/
+#include "Log.h"
+#include <mutex>
+#include "Display.h"
 
 union CR_t {
     uint32_t value;
@@ -36,71 +27,67 @@ union CR_t {
 Floating-Point Status and Control Register (FPSCR)
 */
 union FPSCRegister {
-  u32 FPSCR_Hex;
-  struct {
-    u32 RN : 2;
-    u32 NI : 1;
-    u32 XE : 1;
-    u32 ZE : 1;
-    u32 UE : 1;
-    u32 OE : 1;
-    u32 VE : 1;
-    u32 VXCVI : 1;
-    u32 VXSQRT : 1;
-    u32 VXSOFT : 1;
-    u32 R0 : 1;
-    u32 C : 1;  // FPRF Field.
-    u32 FL : 1;
-    u32 FG : 1;
-    u32 FE : 1;
-    u32 FN : 1;//(1 << 16);
-    u32 FP : 1;//(1 << 17);
-    u32 FU : 1;
-    u32 FI : 1;
-    u32 FR : 1;
-    u32 FZ : 1;//(1 << 18);
-    u32 VXVC : 1;
-    u32 VXIMZ : 1;
-    u32 VXZDZ : 1;
-    u32 VXIDI : 1;
-    u32 VXISI : 1;
-    u32 VXSNAN : 1;
-    u32 XX : 1;
-    u32 ZX : 1;
-    u32 UX : 1;
-    u32 OX : 1;
-    u32 VX : 1;
-    u32 FEX : 1;
-    u32 FX : 1;
-  };
+    u32 FPSCR_Hex;
+    struct {
+        u32 RN : 2;
+        u32 NI : 1;
+        u32 XE : 1;
+        u32 ZE : 1;
+        u32 UE : 1;
+        u32 OE : 1;
+        u32 VE : 1;
+        u32 VXCVI : 1;
+        u32 VXSQRT : 1;
+        u32 VXSOFT : 1;
+        u32 R0 : 1;
+        u32 C : 1;  // FPRF Field.
+        u32 FL : 1;
+        u32 FG : 1;
+        u32 FE : 1;
+        u32 FN : 1;//(1 << 16);
+        u32 FP : 1;//(1 << 17);
+        u32 FU : 1;
+        u32 FI : 1;
+        u32 FR : 1;
+        u32 FZ : 1;//(1 << 18);
+        u32 VXVC : 1;
+        u32 VXIMZ : 1;
+        u32 VXZDZ : 1;
+        u32 VXIDI : 1;
+        u32 VXISI : 1;
+        u32 VXSNAN : 1;
+        u32 XX : 1;
+        u32 ZX : 1;
+        u32 UX : 1;
+        u32 OX : 1;
+        u32 VX : 1;
+        u32 FEX : 1;
+        u32 FX : 1;
+    };
 };
 
-struct uint128_t {
-    uint64_t hi;
-    uint64_t lo;
-};
 
 /*
  XER Register (XER)
 */
 union XERegister {
-  u32 XER_Hex;
+    u32 XER_Hex;
 #ifdef __LITTLE_ENDIAN__
-  struct {
-    u32 ByteCount : 7;
-    u32 R0 : 22;
-    u32 CA : 1;
-    u32 OV : 1;
-    u32 SO : 1;
-  };
+    struct {
+        u32 ByteCount : 7;
+        u32 R0 : 22;
+        u32 CA : 1;
+        u32 OV : 1;
+        u32 SO : 1;
+    };
 #else
-  struct {
-    u32 SO : 1;
-    u32 OV : 1;
-    u32 CA : 1;
-    u32 R0 : 22;
-    u32 ByteCount : 7;
-  };
+    struct {
+        u32 SO : 1;
+        u32 OV : 1;
+        u32 CA : 1;
+        u32 R0 : 22;
+        u32 ByteCount : 7;
+    };
 #endif
 };
 
@@ -108,17 +95,17 @@ union XERegister {
 Time Base (TB)
 */
 union TB {
-  u64 TB_Hex;
+    u64 TB_Hex;
 #ifdef __LITTLE_ENDIAN__
-  struct {
-    u64 TBL : 32;
-    u64 TBU : 32;
-  };
+    struct {
+        u64 TBL : 32;
+        u64 TBU : 32;
+    };
 #else
-  struct {
-    u64 TBU : 32;
-    u64 TBL : 32;
-  };
+    struct {
+        u64 TBU : 32;
+        u64 TBL : 32;
+    };
 #endif
 };
 
@@ -126,59 +113,59 @@ union TB {
 Machine State Register (MSR)
 */
 union MSRegister {
-  u64 MSR_Hex;
+    u64 MSR_Hex;
 #ifdef __LITTLE_ENDIAN__
-  struct {
-    u64 LE : 1;
-    u64 RI : 1;
-    u64 PMM : 1;
-    u64 : 1;
-    u64 DR : 1;
-    u64 IR : 1;
-    u64 : 2;
-    u64 FE1 : 1;
-    u64 BE : 1;
-    u64 SE : 1;
-    u64 FE0 : 1;
-    u64 ME : 1;
-    u64 FP : 1;
-    u64 PR : 1;
-    u64 EE : 1;
-    u64 ILE : 1;
-    u64 : 8;
-    u64 VXU : 1;
-    u64 : 34;
-    u64 HV : 1;
-    u64 : 1;
-    u64 TA : 1;
-    u64 SF : 1;
-  };
+    struct {
+        u64 LE : 1;
+        u64 RI : 1;
+        u64 PMM : 1;
+        u64 : 1;
+        u64 DR : 1;
+        u64 IR : 1;
+        u64 : 2;
+        u64 FE1 : 1;
+        u64 BE : 1;
+        u64 SE : 1;
+        u64 FE0 : 1;
+        u64 ME : 1;
+        u64 FP : 1;
+        u64 PR : 1;
+        u64 EE : 1;
+        u64 ILE : 1;
+        u64 : 8;
+        u64 VXU : 1;
+        u64 : 34;
+        u64 HV : 1;
+        u64 : 1;
+        u64 TA : 1;
+        u64 SF : 1;
+    };
 #else
-  struct {
-    u64 SF : 1;
-    u64 TA : 1;
-    u64 : 1;
-    u64 HV : 1;
-    u64 : 34;
-    u64 VXU : 1;
-    u64 : 8;
-    u64 ILE : 1;
-    u64 EE : 1;
-    u64 PR : 1;
-    u64 FP : 1;
-    u64 ME : 1;
-    u64 FE0 : 1;
-    u64 SE : 1;
-    u64 BE : 1;
-    u64 FE1 : 1;
-    u64 : 2;
-    u64 IR : 1;
-    u64 DR : 1;
-    u64 : 1;
-    u64 PMM : 1;
-    u64 RI : 1;
-    u64 LE : 1;
-  };
+    struct {
+        u64 SF : 1;
+        u64 TA : 1;
+        u64 : 1;
+        u64 HV : 1;
+        u64 : 34;
+        u64 VXU : 1;
+        u64 : 8;
+        u64 ILE : 1;
+        u64 EE : 1;
+        u64 PR : 1;
+        u64 FP : 1;
+        u64 ME : 1;
+        u64 FE0 : 1;
+        u64 SE : 1;
+        u64 BE : 1;
+        u64 FE1 : 1;
+        u64 : 2;
+        u64 IR : 1;
+        u64 DR : 1;
+        u64 : 1;
+        u64 PMM : 1;
+        u64 RI : 1;
+        u64 LE : 1;
+    };
 #endif
 };
 
@@ -186,155 +173,151 @@ union MSRegister {
 Processor Version Register (PVR)
 */
 union PVRegister {
-  u32 PVR_Hex;
+    u32 PVR_Hex;
 #ifdef __LITTLE_ENDIAN__
-  struct {
-    u32 Revision : 16;
-    u32 Version : 16;
-  };
+    struct {
+        u32 Revision : 16;
+        u32 Version : 16;
+    };
 #else
-  struct {
-    u32 Version : 16;
-    u32 Revision : 16;
-  };
+    struct {
+        u32 Version : 16;
+        u32 Revision : 16;
+    };
 #endif
 };
 
 // Segment Lookaside Buffer Entry
 struct SLBEntry {
-  u8 V;
-  u8 LP; // Large Page selector
-  u8 C;
-  u8 L;
-  u8 N;
-  u8 Kp;
-  u8 Ks;
-  u64 VSID;
-  u64 ESID;
-  u64 vsidReg;
-  u64 esidReg;
+    u8 V;
+    u8 LP; // Large Page selector
+    u8 C;
+    u8 L;
+    u8 N;
+    u8 Kp;
+    u8 Ks;
+    u64 VSID;
+    u64 ESID;
+    u64 vsidReg;
+    u64 esidReg;
 };
 
 // Traslation lookaside buffer.
 // Holds a cache of the recently used PTE's.
-struct TLBEntry {
-  bool V;   // Entry valid.
-  u64 pte0; // Holds the valid bit, as well as the AVPN
-  u64 pte1; // Contains the RPN.
-};
-struct TLB_Reg {
-  TLBEntry tlbSet0[256];
-  TLBEntry tlbSet1[256];
-  TLBEntry tlbSet2[256];
-  TLBEntry tlbSet3[256];
-};
+
+/*struct TLB_Reg {
+    TLBEntry tlbSet0[256];
+    TLBEntry tlbSet1[256];
+    TLBEntry tlbSet2[256];
+    TLBEntry tlbSet3[256];
+};*/
 
 // This SPR's are duplicated for every thread.
 struct PPU_THREAD_SPRS {
-  // Fixed Point Exception Register (XER)
-  XERegister XER;
-  // Link Register
-  u64 LR;
-  // Count Register
-  u64 CTR;
-  // CFAR: I dont know the definition.
-  u64 CFAR;
-  // VXU Register Save.
-  u32 VRSAVE;
-  // Data Storage Interrupt Status Register
-  u64 DSISR;
-  // Data Address Register
-  u64 DAR;
-  // Decrementer Register
-  // The contents of the Decrementer are treated as a signed integer.
-  s32 DEC;
-  // Machine Status Save/Restore Register 0
-  u64 SRR0;
-  // Machine Status Save/Restore Register 1
-  u64 SRR1;
-  // Address Compare Control Register
-  u64 ACCR;
-  // Software Use Special Purpose Register 0 - 3
-  u64 SPRG0;
-  u64 SPRG1;
-  u64 SPRG2;
-  u64 SPRG3;
-  // Hypervisor Software Use Special Purpose Register 0
-  u64 HSPRG0;
-  // Hypervisor Software Use Special Purpose Register 1
-  u64 HSPRG1;
-  // Hypervisor Machine Status Save/Restore Register 0
-  u64 HSRR0;
-  // Hypervisor Machine Status Save/Restore Register 1
-  u64 HSRR1;
-  // Thread Status Register Local (TSRL)
-  u64 TSRL;
-  // Thread Status Register Remote (TSRR)
-  u64 TSSR;
-  // PPE Translation Lookaside Buffer Index Hint Register
-  u64 PPE_TLB_Index_Hint;
-  // Data Address Breakpoint
-  u64 DABR;
-  // Data Address Breakpoint Extension
-  u64 DABRX;
-  // Machine-State Register
-  MSRegister MSR;
-  // Processor Identification Register
-  u32 PIR;
+    // Fixed Point Exception Register (XER)
+    XERegister XER;
+    // Link Register
+    u64 LR;
+    // Count Register
+    u64 CTR;
+    // CFAR: I dont know the definition.
+    u64 CFAR;
+    // VXU Register Save.
+    u32 VRSAVE;
+    // Data Storage Interrupt Status Register
+    u64 DSISR;
+    // Data Address Register
+    u64 DAR;
+    // Decrementer Register
+    // The contents of the Decrementer are treated as a signed integer.
+    s32 DEC;
+    // Machine Status Save/Restore Register 0
+    u64 SRR0;
+    // Machine Status Save/Restore Register 1
+    u64 SRR1;
+    // Address Compare Control Register
+    u64 ACCR;
+    // Software Use Special Purpose Register 0 - 3
+    u64 SPRG0;
+    u64 SPRG1;
+    u64 SPRG2;
+    u64 SPRG3;
+    // Hypervisor Software Use Special Purpose Register 0
+    u64 HSPRG0;
+    // Hypervisor Software Use Special Purpose Register 1
+    u64 HSPRG1;
+    // Hypervisor Machine Status Save/Restore Register 0
+    u64 HSRR0;
+    // Hypervisor Machine Status Save/Restore Register 1
+    u64 HSRR1;
+    // Thread Status Register Local (TSRL)
+    u64 TSRL;
+    // Thread Status Register Remote (TSRR)
+    u64 TSSR;
+    // PPE Translation Lookaside Buffer Index Hint Register
+    u64 PPE_TLB_Index_Hint;
+    // Data Address Breakpoint
+    u64 DABR;
+    // Data Address Breakpoint Extension
+    u64 DABRX;
+    // Machine-State Register
+    MSRegister MSR;
+    // Processor Identification Register
+    u32 PIR;
 };
 // This contains SPR's that are shared by both threads.
 struct PPU_STATE_SPRS {
-  // Storage Description Register 1
-  u64 SDR1;
-  // Control Register
-  u32 CTRL;
-  // Time Base
-  u64 TB;
-  // Processor Version Register
-  PVRegister PVR;
-  // Hypervisor Decrementer
-  u32 HDEC;
-  // Real Mode Offset Register
-  u64 RMOR;
-  // Hypervisor Real Mode Offset Register
-  u64 HRMOR;
-  // Logical Partition Control Register (This register has partially shared fields)
-  // FIXME!
-  u64 LPCR;
-  // Logical Partition Identity Register
-  u32 LPIDR;
-  // Thread Switch Control Register
-  u32 TSCR;
-  // Thread Switch Timeout Register
-  u64 TTR;
-  // Translation Lookaside Buffer Index Register
-  u64 PPE_TLB_Index;
-  // Translation Lookaside Buffer Virtual-Page Number Register
-  u64 PPE_TLB_VPN;
-  // Translation Lookaside Buffer Real-Page Number Register
-  u64 PPE_TLB_RPN;
-  // Translation Lookaside Buffer RMT Register
-  u64 PPE_TLB_RMT;
-  // Hardware Implementation Register 0
-  u64 HID0;
-  // Hardware Implementation Register 1
-  u64 HID1;
-  // Hardware Implementation Register 4
-  u64 HID4;
-  // Hardware Implementation Register 6
-  u64 HID6;
+    // Storage Description Register 1
+    u64 SDR1;
+    // Control Register
+    u32 CTRL;
+    // Time Base
+    u64 TB;
+    // Processor Version Register
+    PVRegister PVR;
+    // Hypervisor Decrementer
+    u32 HDEC;
+    // Real Mode Offset Register
+    u64 RMOR;
+    // Hypervisor Real Mode Offset Register
+    u64 HRMOR;
+    // Logical Partition Control Register (This register has partially shared fields)
+    // FIXME!
+    u64 LPCR;
+    // Logical Partition Identity Register
+    u32 LPIDR;
+    // Thread Switch Control Register
+    u32 TSCR;
+    // Thread Switch Timeout Register
+    u64 TTR;
+    // Translation Lookaside Buffer Index Register
+    u64 PPE_TLB_Index;
+    // Translation Lookaside Buffer Virtual-Page Number Register
+    u64 PPE_TLB_VPN;
+    // Translation Lookaside Buffer Real-Page Number Register
+    u64 PPE_TLB_RPN;
+    // Translation Lookaside Buffer RMT Register
+    u64 PPE_TLB_RMT;
+    // Hardware Implementation Register 0
+    u64 HID0;
+    // Hardware Implementation Register 1
+    u64 HID1;
+    // Hardware Implementation Register 4
+    u64 HID4;
+    // Hardware Implementation Register 6
+    u64 HID6;
 };
 
 // Thread IDs for ease of handling
 enum ePPUThread : u8 {
-  ePPUThread_Zero = 0,
-  ePPUThread_One,
-  ePPUThread_None
+    ePPUThread_Zero = 0,
+    ePPUThread_One,
+    ePPUThread_None
 };
 enum ePPUThreadBit : u8 {
-  ePPUThreadBit_None = 0,
-  ePPUThreadBit_Zero,
-  ePPUThreadBit_One
+    ePPUThreadBit_None = 0,
+    ePPUThreadBit_Zero,
+    ePPUThreadBit_One
 };
 
 //
@@ -342,19 +325,19 @@ enum ePPUThreadBit : u8 {
 //
 
 enum SECENG_REGION_TYPE {
-  SECENG_REGION_PHYS = 0,
-  SECENG_REGION_HASHED = 1,
-  SECENG_REGION_SOC = 2,
-  SECENG_REGION_ENCRYPTED = 3
+    SECENG_REGION_PHYS = 0,
+    SECENG_REGION_HASHED = 1,
+    SECENG_REGION_SOC = 2,
+    SECENG_REGION_ENCRYPTED = 3
 };
 
 struct SECENG_ADDRESS_INFO {
-  // Real address we're accessing on the bus.
-  u32 accessedAddr;
-  // Region This address belongs to.
-  SECENG_REGION_TYPE regionType;
-  // Key used to hash/encrypt this address.
-  u8 keySelected;
+    // Real address we're accessing on the bus.
+    u32 accessedAddr;
+    // Region This address belongs to.
+    SECENG_REGION_TYPE regionType;
+    // Key used to hash/encrypt this address.
+    u8 keySelected;
 };
 
 #define XE_RESET_VECTOR 0x100
@@ -391,13 +374,13 @@ struct SECENG_ADDRESS_INFO {
 // Floating Point Register
 
 union SFPRegister { // Single Precision
-  float valueAsFloat;
-  u32 valueAsU32;
+    float valueAsFloat;
+    u32 valueAsU32;
 };
 
 union FPRegister { // Double Precision
-  double valueAsDouble;
-  u64 valueAsU64;
+    double valueAsDouble;
+    u64 valueAsU64;
 };
 
 //
@@ -406,127 +389,38 @@ union FPRegister { // Double Precision
 
 // This contains all registers that are duplicated per thread.
 struct PPU_THREAD_REGISTERS {
-  PPU_THREAD_SPRS SPR;
-  // Previous Instruction Address
-  u64 PIA;
-  // Current Instruction Address
-  u64 CIA;
-  // Next Instruction Address
-  u64 NIA;
-  // Previous instruction data
-  //PPCOpcode PI;
-  // Current instruction data
-  //PPCOpcode CI;
-  // Next instruction data
-  //PPCOpcode NI;
-  // Instruction fetch flag
-  bool iFetch = false;
-  // General-Purpose Registers (32)
-  u64 GPR[32]{};
-  // Floating-Point Registers (32)
-  FPRegister FPR[32]{};
-  // Condition Register
-  //CRegister CR;
-  //CR_Reg CRBits;
-
- 
-  // Segment Lookaside Buffer
-  SLBEntry SLB[64]{};
-
-  // ERAT's
-
-  //LRUCache iERAT{ 0 }; // Instruction effective to real address cache.
-  //LRUCache dERAT{ 0 }; // Data effective to real address cache.
-
-  // Interrupt Register
-  u16 exceptReg = 0;
-  // Tells wheter we're currently processing an exception.
-  bool exceptionTaken = false;
-  // For use with Data/Instruction Storage/Segment exceptions.
-  u64 exceptEA = 0;
-  // Trap type
-  u16 exceptTrapType = 0;
-  // SystemCall Type
-  bool exceptHVSysCall = false;
-
-  // Interrupt EA for managing Interrupts.
-  u64 intEA = 0;
-
-  // Helper Debug Variables
-  u64 lastWriteAddress = 0;
-  u64 lastRegValue = 0;
-
-  //std::unique_ptr<PPU_RES> ppuRes{};
+    PPU_THREAD_SPRS SPR;
+    // Previous Instruction Address
+    u64 PIA;
+    // Current Instruction Address
+    u64 CIA;
+    // Next Instruction Address
+    u64 NIA;
+    // Instruction fetch flag
+    bool iFetch = false;
+    // General-Purpose Registers (32)
+    u64 GPR[32]{};
+    // Floating-Point Registers (32)
+    FPRegister FPR[32]{};
+    // Segment Lookaside Buffer
+    SLBEntry SLB[64]{};
+    // Interrupt Register
+    u16 exceptReg = 0;
+    // Tells wheter we're currently processing an exception.
+    bool exceptionTaken = false;
+    // For use with Data/Instruction Storage/Segment exceptions.
+    u64 exceptEA = 0;
+    // Trap type
+    u16 exceptTrapType = 0;
+    // SystemCall Type
+    bool exceptHVSysCall = false;
+    // Interrupt EA for managing Interrupts.
+    u64 intEA = 0;
+    // Helper Debug Variables
+    u64 lastWriteAddress = 0;
+    u64 lastRegValue = 0;
 };
 
-/*struct PPU_STATE {
-  ~PPU_STATE() {
-    for (u8 i = 0; i < 2; ++i) {
-      ppuThread[i].iERAT = LRUCache{ 0 };
-      ppuThread[i].dERAT = LRUCache{ 0 };
-      ppuThread[i].ppuRes.reset();
-    }
-  }
-  // Thread Specific State.
-  PPU_THREAD_REGISTERS ppuThread[2]{};
-  // Current executing thread.
-  ePPUThread currentThread = ePPUThread_Zero;
-  // Shared Special Purpose Registers.
-  PPU_STATE_SPRS SPR{};
-  // Translation Lookaside Buffer
-  TLB_Reg TLB{};
-  // Address Translation Flag
-  bool translationInProgress = false;
-  // Current PPU Name, for ease of debugging.
-  std::string ppuName{};
-  // PPU ID
-  u8 ppuID = 0;
-};
-
-struct XENON_CONTEXT {
-    // 32Kb SROM
-    u8* SROM = new u8[XE_SROM_SIZE];
-    // 64 Kb SRAM
-    u8* SRAM = new u8[XE_SRAM_SIZE];
-    // 768 bits eFuse
-    //eFuses fuseSet = {};
-
-    // Xenon IIC.
-    //Xe::XCPU::IIC::XenonIIC xenonIIC = {};
-
-    //XenonReservations xenonRes = {};
-
-    // Time Base switch, possibly RTC register, the TB counter only runs if this
-    // value is set.
-    bool timeBaseActive = false;
-
-    // Xenon SOC Blocks R/W methods.
-    bool HandleSOCRead(u64 readAddr, u8* data, size_t byteCount);
-    bool HandleSOCWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    //
-    // SOC Blocks.
-    // 
-
-    // Secure OTP Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCSECOTP_ARRAY> socSecOTPBlock = std::make_unique<Xe::XCPU::SOC::SOCSECOTP_ARRAY>();
-
-    // Security Engine Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCSECENG_BLOCK> socSecEngBlock = std::make_unique<Xe::XCPU::SOC::SOCSECENG_BLOCK>();
-
-    // Secure RNG Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCSECRNG_BLOCK> socSecRNGBlock = std::make_unique<Xe::XCPU::SOC::SOCSECRNG_BLOCK>();
-
-    // CBI Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCCBI_BLOCK> socCBIBlock = std::make_unique<Xe::XCPU::SOC::SOCCBI_BLOCK>();
-
-    // PMW Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCPMW_BLOCK> socPMWBlock = std::make_unique<Xe::XCPU::SOC::SOCPMW_BLOCK>();
-
-    // Pervasive Block.
-    //std::unique_ptr<Xe::XCPU::SOC::SOCPRV_BLOCK> socPRVBlock = std::make_unique<Xe::XCPU::SOC::SOCPRV_BLOCK>();
-
-}*/
 //
 // Xenon Special Purpose Registers
 //
@@ -613,7 +507,11 @@ struct XENON_CONTEXT {
 
 class CPU {
 public:
-    explicit CPU(MMU* mmu);
+    CPU(MMU* mmu, Display* display);
+    CPU(MMU* mmu);      
+
+    void SetDisplay(Display* disp) { this->display = disp; } // opcional si querés asignarlo luego
+
     void Reset(uint32_t start_pc, std::array<uint32_t, 32> GPR);
     void Reset();
     void Step();
@@ -632,40 +530,28 @@ public:
     void SetSPR(uint32_t spr, uint32_t value) { SPR[spr] = value; }
     uint32_t MaskFromMBME(uint32_t MB, uint32_t ME);
     void SerializeState(std::ostream& out);
-    void DeserializeState(std::istream& in); 
+    void DeserializeState(std::istream& in);
+
+    void DecodeExecute(uint32_t instr);
+    //void execute(uint32_t instr);
+    unsigned int invertirBytes(unsigned int valor);
+    void TriggerException(uint32_t vector); // Exception handling
+    void HandleSyscall();
+    void haltInvalidOpcode(uint32_t opcode) { LOG_ERROR("[CPU]", "Ivalid OPCODE 0x%008X", opcode); }
+    // helpers para vector-loads y traps    
+    std::array<uint32_t, 32> LoadVectorShiftLeft(uint32_t addr);   // carga 16 bytes desde addr
+    std::array<uint32_t, 32> LoadVectorShiftRight(uint32_t addr);  // idem    
+    void __sync_synchronize() const { std::atomic_thread_fence(std::memory_order_seq_cst); }
+    // --- TriggerTrap: usar excepción de programa/prog trap ---
+    void TriggerTrap();
+    void HandleCRInstructions(uint32_t instr, uint32_t sub);
+    void HandleBranchConditional(uint32_t instr, bool to_ctr);
+    void HandleISync();
+
 
 private:
-
-    // Mutex for thread safety.
-    //std::recursive_mutex mutex;
-
-    // SOC Blocks R/W.
-
-    // Security Engine Block.
-    //bool HandleSecEngRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandleSecEngWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    // Secure OTP Block.
-    //bool HandleSecOTPRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandleSecOTPWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    // Secure RNG Block.
-    //bool HandleSecRNGRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandleSecRNGWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    // CBI Block.
-    //bool HandleCBIRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandleCBIWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    // PMW Block.
-    //bool HandlePMWRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandlePMWWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
-    // Pervasive logic Block.
-    //bool HandlePRVRead(u64 readAddr, u8* data, size_t byteCount);
-    //bool HandlePRVWrite(u64 writeAddr, const u8* data, size_t byteCount);
-
     MMU* mmu;
+    Display* display;  // nueva dependencia
     uint32_t PC;       // Program Counter
     uint32_t LR;       // Link Register
     uint32_t CTR;      // Count Register
@@ -681,18 +567,25 @@ private:
     uint32_t TBL, TBU; // Time Base Lower/Upper
     std::array<uint32_t, 32> GPR; // General Purpose Registers
     std::array<double, 32> FPR;   // Floating-Point Registers
-    std::array<uint128_t, 32> VPR; // Vector Registers
+    std::array<uint32_t, 32> VPR; // Vector Registers    
+    //std::array<std::array<uint8_t, 16>, 32> VPR; // 32 registers, each 128 bits (16 bytes)    
     std::array<uint32_t, 1024> SPR; // Special Purpose Registers
     std::array<uint32_t, 8> GQR;   // Graphics Quantization Registers
+
+    uint64_t VACC; // Vector accumulator para instrucciones de sumas y multiplies
+    uint64_t VPR_acc; // acumulador para 128-bit ops   
+
     CR_t CR;                       // Condition Register    
-    
+
     // Floating-Point Status Control Register
     FPSCRegister FPSCRegs;
     uint32_t reservation_addr;
     bool reservation_valid;
     bool running;
-    void DecodeExecute(uint32_t instr);
-    void TriggerException(uint32_t vector); // Exception handling
+    // reservation and vector trap flag
+    bool trapFlag;
+    std::mutex cpu_mutex;
+
 };
 
 #endif 

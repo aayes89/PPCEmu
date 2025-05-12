@@ -1,154 +1,276 @@
-/* Made by Slam */
-/*
-Memory Management Unit
-*/
+﻿// MMU.cpp
 #include "MMU.h"
 #include "Log.h"
+#include <cstring>
+#include <iostream>
 #include <stdexcept>
 
-void MMU::MapMemory(std::shared_ptr<MemoryDevice> device, uint64_t virtual_start, uint64_t virtual_end, uint64_t physical_start, bool readable, bool writable, bool executable) {
-    MemoryRegion region;
-    region.device = device;
-    region.virtual_start = virtual_start;
-    region.virtual_end = virtual_end;
-    region.physical_start = physical_start;
-    region.readable = readable;
-    region.writable = writable;
-    region.executable = executable;
-    regions.push_back(region);
-    LOG_INFO("MMU", "Mapped region 0x%I64X-0x%I64X to %s", virtual_start, virtual_end, device->GetName().c_str());
+constexpr size_t ALIGN_2 = 2;
+constexpr size_t ALIGN_4 = 4;
+constexpr size_t ALIGN_8 = 8;
+
+void MMU::MapMemory(std::shared_ptr<MemoryDevice> device,
+	uint64_t virtual_start,
+	uint64_t virtual_end,
+	uint64_t physical_start,
+	bool readable,
+	bool writable,
+	bool executable) {
+	MemoryRegion region;
+	region.device = device;
+	region.virtual_start = virtual_start;
+	region.virtual_end = virtual_end;
+	region.physical_start = physical_start;
+	region.readable = readable;
+	region.writable = writable;
+	region.executable = executable;
+	regions.push_back(region);
+	LOG_INFO("MMU", "Mapped region 0x%016llX-0x%016llX to %s, readable=%d, writable=%d, executable=%d",
+		virtual_start, virtual_end, device->GetName().c_str(), readable, writable, executable);
+	std::cout << "[DEBUG] MMU::MapMemory: Added region 0x" << std::hex << virtual_start
+		<< "-0x" << virtual_end << ", physical_start=0x" << physical_start
+		<< ", device=" << device->GetName() << ", total regions=" << regions.size() << std::dec << "\n";
 }
 
-MemoryRegion* MMU::FindRegion(uint64_t address, bool read, bool write, bool execute) {
-    if (verbose_logging_) {
-        std::cout << "FindRegion: address=0x" << std::hex << address << ", read=" << read << ", write=" << write << ", execute=" << execute << std::endl;
-    }
-    for (auto& region : regions) {
-        if (verbose_logging_) {
-            std::cout << "Checking region: 0x" << std::hex << region.virtual_start << "-0x" << region.virtual_end
-                << ", readable=" << region.readable << ", writable=" << region.writable << ", executable=" << region.executable
-                << ", device=" << region.device->GetName() << std::endl;
-            std::cout << "Condition: address(0x" << std::hex << address << ") >= virtual_start(0x" << region.virtual_start << "): "
-                << (address >= region.virtual_start) << ", address < virtual_end(0x" << region.virtual_end << "): "
-                << (address < region.virtual_end) << std::endl;
-        }
-        if (address >= region.virtual_start && address < region.virtual_end) {
-            if ((read && !region.readable) || (write && !region.writable) || (execute && !region.executable)) {
-                LOG_CRITICAL("MMU", "Permission denied at 0x%016llX (read=%d, write=%d, execute=%d)", address, read, write, execute);
-                throw std::runtime_error("Memory access permission denied");
-            }
-            if (verbose_logging_) {
-                std::cout << "Region found for address 0x" << std::hex << address << std::endl;
-            }
-            return &region;
-        }
-    }
-    LOG_CRITICAL("MMU", "Invalid memory access at 0x%016llX!", address);
-    throw std::out_of_range("Accessing unmapped memory address");
+MemoryRegion* MMU::FindRegion(uint64_t addr, bool read, bool write, bool execute) {
+	std::cout << "[DEBUG] MMU::FindRegion: Searching for addr=0x" << std::hex << addr
+		<< ", read=" << read << ", write=" << write << ", execute=" << execute << std::dec << "\n";
+	for (auto& region : regions) {
+		std::cout << "[DEBUG] MMU::FindRegion: Checking region 0x" << std::hex << region.virtual_start
+			<< "-0x" << region.virtual_end << ", device=" << region.device->GetName()
+			<< ", readable=" << region.readable << ", writable=" << region.writable
+			<< ", executable=" << region.executable << std::dec << "\n";
+		if (addr >= region.virtual_start && addr < region.virtual_end) {
+			if ((read && !region.readable) || (write && !region.writable) || (execute && !region.executable)) {
+				std::cerr << "Access denied: addr=0x" << std::hex << addr << ", read=" << read
+					<< ", write=" << write << ", execute=" << execute << std::dec << "\n";
+				return nullptr;
+			}
+			std::cout << "[DEBUG] MMU::FindRegion: Found region for addr=0x" << std::hex << addr
+				<< ", device=" << region.device->GetName() << std::dec << "\n";
+			return &region;
+		}
+		else {
+			std::cout << "[DEBUG] MMU::FindRegion: Address 0x" << std::hex << addr
+				<< " not in region 0x" << region.virtual_start << "-0x" << region.virtual_end << std::dec << "\n";
+		}
+	}
+	std::cerr << "[DEBUG] MMU::FindRegion: No region found for addr=0x" << std::hex << addr << std::dec << "\n";
+	return nullptr;
 }
 
-void MMU::Read(uint64_t address, uint8_t* data, uint64_t size) {
-    MemoryRegion* region = FindRegion(address, true, false, false);
-    if (address + size > region->virtual_end) {
-        throw std::out_of_range("Read out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    region->device->Read(physical_address, data, size);
+void MMU::ClearRegions() {
+	regions.clear();
 }
 
-void MMU::Write(uint64_t address, const uint8_t* data, uint64_t size) {
-    MemoryRegion* region = FindRegion(address, false, true, false);
-    if (address + size > region->virtual_end) {
-        throw std::out_of_range("Write out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    region->device->Write(physical_address, data, size);
+bool MMU::Read(uint64_t address, uint8_t* data, uint64_t size)
+{
+	auto* region = FindRegion(address, true, false, false);
+	uint64_t offset = address - region->virtual_start + region->physical_start;
+	region->device->Read(offset, data, size);
+	return true;
 }
 
-void MMU::MemSet(uint64_t address, int32_t value, uint64_t size) {
-    MemoryRegion* region = FindRegion(address, false, true, false);
-    if (address + size > region->virtual_end) {
-        throw std::out_of_range("MemSet out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    region->device->MemSet(physical_address, value, size);
+void MMU::Write(uint64_t addr, const uint8_t* src, uint64_t size) {
+	auto region = FindRegion(addr, false, true, false);
+	if (!region) {
+		std::cerr << "MMU::Write: No region found for addr=0x" << std::hex << addr << std::dec << "\n";
+		throw std::runtime_error("MMU: Write to unmapped region");
+	}
+	uint64_t offset = addr - region->virtual_start + region->physical_start;
+	std::cout << "[DEBUG] MMU::Write: addr=0x" << std::hex << addr << ", offset=0x" << offset
+		<< ", size=" << std::dec << size << ", device=" << region->device->GetName() << "\n";
+	region->device->Write(offset, src, size);
 }
 
-uint8_t* MMU::GetPointerToAddress(uint64_t address) {
-    MemoryRegion* region = FindRegion(address, true, false, false);
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    return static_cast<uint8_t*>(region->device->GetPointerToAddress(physical_address));
+void MMU::MemSet(uint64_t address, uint8_t value, uint64_t size)
+{
+	auto* region = FindRegion(address, false, true, false);
+	uint64_t offset = address - region->virtual_start + region->physical_start;
+	region->device->MemSet(offset, value, size);
 }
 
+uint8_t* MMU::GetPointerToAddress(uint64_t address)
+{
+	auto* region = FindRegion(address, true, false, false);
+	uint64_t offset = address - region->virtual_start + region->physical_start;
+	return region->device->GetPointerToAddress(offset);
+}
 
-/*uint16_t MMU::Read16(uint32_t addr) {
-    uint8_t buf[2];
-    Read(addr, buf, 2);                              // existing byte‐array reader
-    return (uint16_t(buf[0]) << 8) | uint16_t(buf[1]);
+// Accesos de lectura
+uint8_t MMU::Read8(uint64_t addr)
+{
+	auto* region = FindRegion(addr, true, false, false);
+	return region->device->Read8(addr - region->virtual_start + region->physical_start);
+}
+
+uint16_t MMU::Read16(uint64_t addr)
+{
+	CheckAlignment(addr, 2);
+	auto* region = FindRegion(addr, true, false, false);
+	return region->device->Read16(addr - region->virtual_start + region->physical_start);
+}
+
+/*
+uint32_t MMU::Read32(uint64_t addr) {
+	CheckAlignment(addr, 4);
+	auto* region = FindRegion(addr, true, false, false);
+	if (!region) {
+		std::cerr << "MMU::Read32: Unmapped address 0x" << std::hex << addr << std::dec << "\n";
+		throw std::runtime_error("MMU: unmapped address");
+	}
+	uint64_t offset = addr - region->virtual_start + region->physical_start;
+	uint32_t value = region->device->Read32(offset);
+	std::cout << "MMU::Read32: addr=0x" << std::hex << addr << ", offset=0x" << offset
+		<< ", device=" << region->device->GetName() << ", value=0x" << value << std::dec << "\n";
+	return value;
 }*/
+uint32_t MMU::Read32(uint64_t addr) {
+	auto* region = FindRegion(addr, true, false, false);
+	if (!region) throw std::runtime_error("MMU: unmapped address");
+
+	uint64_t offset = addr - region->virtual_start + region->physical_start;
+
+	// Si está alineado, podemos delegar directamente
+	if ((addr & 0x3) == 0) {
+		return region->device->Read32(offset);
+	}
+	// Si NO está alineado, leemos byte a byte (big-endian)
+	uint8_t b0 = region->device->Read8(offset + 0);
+	uint8_t b1 = region->device->Read8(offset + 1);
+	uint8_t b2 = region->device->Read8(offset + 2);
+	uint8_t b3 = region->device->Read8(offset + 3);
+	return (uint32_t(b0) << 24)
+		| (uint32_t(b1) << 16)
+		| (uint32_t(b2) << 8)
+		| (uint32_t(b3) << 0);
+}
+
+uint64_t MMU::Read64(uint64_t addr)
+{
+	CheckAlignment(addr, 8);
+	auto* region = FindRegion(addr, true, false, false);
+	return region->device->Read64(addr - region->virtual_start + region->physical_start);
+}
+
+uint64_t MMU::Read128(uint32_t addr)
+{
+	uint64_t low = Read64(addr);
+	uint64_t high = Read64(addr + 8);
+	return (high << 64) | low;
+}
+
+std::vector<uint8_t> MMU::ReadBytes(uint64_t address, size_t size)
+{
+	std::vector<uint8_t> buffer(size);
+	Read(address, buffer.data(), size);
+	return buffer;
+}
+
+// Escrituras
 void MMU::Write8(uint64_t addr, uint8_t val) {
-    auto region = FindRegion(addr, /*read=*/false, /*write=*/true, /*execute=*/false);
-    if (!region) {
-        std::cerr << "[CRITICAL] Invalid memory write8 at 0x" << std::hex << addr << std::endl;
-        throw std::runtime_error("Invalid memory access (Write8)");
-    }
-    region->device->Write8(addr - region->virtual_start, val);
+	auto region = FindRegion(addr, false, true, false);
+	if (!region || !region->device) {
+		std::cerr << "MMU::Write: No region found for addr=0x" << std::hex << addr << std::dec << "\n";
+		throw std::runtime_error("MMU: Write to unmapped region");
+	}
+	uint64_t offset = addr - region->virtual_start;
+	std::cout << "MMU::Write8: addr=0x" << std::hex << addr << ", offset=0x" << offset
+		<< ", val=0x" << (int)val << " ('" << (char)val << "'), device=" << region->device->GetName() << "\n";
+	std::cout << "MMU::Write8: Calling device->Write8 with addr=0x" << std::hex << addr << std::dec << "\n";
+	region->device->Write8(addr, val);
 }
 
-void MMU::Write16(uint32_t addr, uint16_t value) {
-    uint8_t buf[2] = { uint8_t(value >> 8), uint8_t(value) };
-    Write(addr, buf, 2);                             // existing byte‐array writer
+void MMU::Write16(uint64_t addr, uint16_t val) {
+	auto* region = FindRegion(addr, false, true, false);
+	if (!region) {
+		std::cerr << "MMU::Write16: Unmapped address 0x" << std::hex << addr << std::dec << "\n";
+		throw std::runtime_error("MMU: unmapped address");
+	}
+	uint64_t offset = addr - region->virtual_start + region->physical_start;
+	std::cout << "MMU::Write16: addr=0x" << std::hex << addr << ", offset=0x" << offset
+		<< ", val=0x" << val << ", device=" << region->device->GetName() << std::dec << "\n";
+	region->device->Write16(offset, val);
 }
 
-/*uint32_t MMU::Read32(uint64_t address) {
-    MemoryRegion* region = FindRegion(address, true, false, false);
-    if (address + 4 > region->virtual_end) {
-        throw std::out_of_range("Read32 out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    return region->device->Read32(physical_address);
+/*void MMU::Write32(uint64_t addr, uint32_t value)
+{
+	CheckAlignment(addr, 4);
+	auto* region = FindRegion(addr, false, true, false);
+	region->device->Write32(addr - region->virtual_start + region->physical_start, value);
 }*/
+void MMU::Write32(uint64_t addr, uint32_t value) {
+	auto* region = FindRegion(addr, false, true, false);
+	if (!region) throw std::runtime_error("MMU: unmapped address");
 
-void MMU::Write32(uint64_t address, uint32_t value) {
-    MemoryRegion* region = FindRegion(address, false, true, false);
-    if (address + 4 > region->virtual_end) {
-        throw std::out_of_range("Write32 out of bounds");
-    }
-    /* Hook para ver donde escribe en el FB*/
-    if ((address >= 0xC0000000ULL && address < 0xC0000000ULL + (640 * 480 * 4)) ||
-        (address >= 0x80000200EA000000ULL) ||
-        (address >= 0xEC800000ULL && address < 0xEC800000ULL + (640 * 480 * 4))) {
-        std::cout << "[FRAMEBUFFER WRITE] Addr=0x" << std::hex << address
-            << " Value=0x" << value << std::endl;
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    if (region->device->GetName() == "XELL-FB") {
-        printf("[FB Write32] addr=0x%08llX value=0x%08X\n", address, value);
-    }
-    region->device->Write32(physical_address, value);
+	uint64_t offset = addr - region->virtual_start + region->physical_start;
+
+	// Si está alineado, podemos delegar
+	if ((addr & 0x3) == 0) {
+		region->device->Write32(offset, value);
+		return;
+	}
+	// Desalineado: escribimos byte a byte (big-endian)
+	region->device->Write8(offset + 0, uint8_t(value >> 24));
+	region->device->Write8(offset + 1, uint8_t(value >> 16));
+	region->device->Write8(offset + 2, uint8_t(value >> 8));
+	region->device->Write8(offset + 3, uint8_t(value >> 0));
 }
 
-uint64_t MMU::Read64(uint64_t address) {
-    MemoryRegion* region = FindRegion(address, true, false, false);
-    if (address + 8 > region->virtual_end) {
-        throw std::out_of_range("Read64 out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    return region->device->Read64(physical_address);
+void MMU::Write64(uint64_t addr, uint64_t value)
+{
+	CheckAlignment(addr, 8);
+	auto* region = FindRegion(addr, false, true, false);
+	region->device->Write64(addr - region->virtual_start + region->physical_start, value);
 }
 
-void MMU::Write64(uint64_t address, uint64_t value) {
-    MemoryRegion* region = FindRegion(address, false, true, false);
-    if (address + 8 > region->virtual_end) {
-        throw std::out_of_range("Write64 out of bounds");
-    }
-    uint64_t physical_address = address - region->virtual_start + region->physical_start;
-    if (region->device->GetName() == "ConsoleFB") {
-        printf("[FB Write64] addr=0x%08llX value=0x%016llX\n", address, value);
-    }
-    region->device->Write64(physical_address, value);
+void MMU::Write128(uint32_t addr, uint64_t val)
+{
+	Write64(addr, val);        // LSB
+	Write64(addr + 8, val);    // MSB (si deseas 128 bits de mismo valor)
 }
 
-/*void MMU::SetVerboseLogging(bool verbose) {
-    verbose_logging_ = verbose;
-}*/
+// SIMD y pseudo SIMD
+uint64_t MMU::ReadLeft(uint32_t addr) { return Read64(addr); }
+uint64_t MMU::ReadRight(uint32_t addr) { return Read64(addr + 8); }
+void MMU::WriteLeft(uint32_t addr, uint64_t val) { Write64(addr, val); }
+void MMU::WriteRight(uint32_t addr, uint64_t val) { Write64(addr + 8, val); }
+
+uint64_t MMU::LoadVectorShiftLeft(uint32_t addr)
+{
+	uint64_t val = Read64(addr);
+	return val << 8;
+}
+
+uint64_t MMU::LoadVectorShiftRight(uint32_t addr)
+{
+	uint64_t val = Read64(addr);
+	return val >> 8;
+}
+
+uint64_t MMU::LoadVectorRight(uint32_t addr) { return Read64(addr + 8); }
+uint64_t MMU::LoadVectorLeft(uint32_t addr) { return Read64(addr); }
+
+// Cachés (mock)
+void MMU::DCACHE_Store(uint32_t addr) {
+	if (verbose_logging_) std::cout << "[DCACHE_Store] addr=0x" << std::hex << addr << std::dec << "\n";
+}
+
+void MMU::DCACHE_Flush(uint32_t addr) {
+	if (verbose_logging_) std::cout << "[DCACHE_Flush] addr=0x" << std::hex << addr << std::dec << "\n";
+}
+
+void MMU::DCACHE_CleanInvalidate(uint32_t addr) {
+	if (verbose_logging_) std::cout << "[DCACHE_CleanInvalidate] addr=0x" << std::hex << addr << std::dec << "\n";
+}
+
+void MMU::ICACHE_Invalidate(uint32_t addr) {
+	if (verbose_logging_) std::cout << "[ICACHE_Invalidate] addr=0x" << std::hex << addr << std::dec << "\n";
+}
+
+void MMU::CheckAlignment(uint64_t address, size_t alignment) const
+{
+	if (address % alignment != 0) {
+		throw std::runtime_error("Unaligned access at address: " + std::to_string(address));
+	}
+}
