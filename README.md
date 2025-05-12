@@ -22,13 +22,14 @@ Este proyecto empezó como inspiración de otro que se encuentra en mi repositor
 
 * Memoria virtual.
 * Conjunto de Instrucciones para PPC.
+* Cargar: <b>elf32, elf64</b> y <b>bin (RAW)</b>
 * <b>Framebuffer</b> con WinAPI.
 * Kit de herramientas para textos y primitivas.
 * Logs.
 
 # Pendientes y Mejoras
 
-* Cargar binarios: <b>XEX, ELF, BIN</b>
+* Cargar binarios: <b>xex</b>
 * Emular el comportamiento de la Xbox 360 desde el arranque.
 * Implementar manejo de SoC (más robusto)
 * Emular estructuras críticas de la consola. (<b>1BL, NAND, Dashboard, CD/DVD, HDD, ...</b>)
